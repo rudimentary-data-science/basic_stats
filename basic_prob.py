@@ -5,13 +5,13 @@ def E(val):
 
 def var(val )->float:
     if type(val) == list:
-        return sum(square(sub(col,mean())))/(len(col)-1)
+        return sum(square(sub(val,mean(val))))/(len(val)-1)
     elif type(val)==Emperical_DRV:
         return val.var()
 
 def sd(val)->float:
     if type(val) == list:
-        return sqrt(var(col))
+        return sqrt(var(val))
     elif type(val)==Emperical_DRV:
         return val.sd()
 # add moment generating function
@@ -121,11 +121,6 @@ def trimmed_mean(col : list[float],per : int)->float:
         return mean(sorted(col)[k:len(col)-k])
     else:
         raise ValueError("Percentage value should be between 1 and 100")
-#sum((x-x_mean)^2)
-def var(col : list[float])->float:
-    ''' returns variance of the column'''
-    return sum(square(sub(col,mean(col))))/(len(col)-1)
-
 
 def isBoolean(col : list)->bool:
     ''' checks if the entire column is made up of boolean values'''
@@ -174,7 +169,6 @@ def mul(col:list[float],val:list)->list[float]:
 
         returns the elementwise product if the 2nd argument is a list
     '''
-
     if type(val) == list:
         if len(val) == len(col):
             return [x*y for x,y in zip(col,val)]
@@ -305,8 +299,6 @@ class Emperical_DRV:
             return self.probs <= rhs.values
         else:
             raise ValueError("Expected a dict or int or float") 
-    
-
 
     def pmf(self,key):
         return prob(self==key)
@@ -323,10 +315,37 @@ class Emperical_DRV:
         return Emperical_DRV(a2)
 
     def var(self):
-        return self.transform(lambda x:x**2).expectation()-self.expectation()**2
+        return self.transform(lambda x:x**2).E()-self.E()**2
 
     def sd(self):
-        return sqrt(self.variance())
+        return sqrt(self.var())
 
+    def __add__(self,scalar):
+        if type(scalar)==float or type(scalar)==int:
+            return self.transform(lambda x:x+scalar) 
+        else:
+            raise TypeError("Expected float or integer")
 
+    def __radd__(self,scalar):
+        if type(scalar)==float or type(scalar)==int:
+            return self.transform(lambda x:x+scalar) 
+        else:
+            raise TypeError("Expected float or integer")
+    def __mul__(self,scalar):
+        if type(scalar)==float or type(scalar)==int:
+            return self.transform(lambda x:x*scalar) 
+        else:
+            raise TypeError("Expected float or integer")
     
+    def __rmul__(self,scalar):
+        if type(scalar)==float or type(scalar)==int:
+            return self.transform(lambda x:x*scalar) 
+        else:
+            raise TypeError("Expected float or integer")
+    
+    def __pow__(self,scalar):
+        if type(scalar)==float or type(scalar)==int:
+            return self.transform(lambda x:x**scalar) 
+        else:
+            raise TypeError("Expected float or integer")
+

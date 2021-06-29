@@ -31,8 +31,8 @@ from time import time
 
 def test_time2():
     start_time = time()
-    rv.transform(lambda x:x**2).expectation()-rv.expectation()**2
     print(time()-start_time)
-
-bp.E(rv)
+E = bp.E
+print(E(rv))
+print([E(rv+2),E(2+rv),E(2*rv),E(rv*2),E(rv**2)])
 

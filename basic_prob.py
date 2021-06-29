@@ -31,7 +31,6 @@ def sqrt(num : float )->float:
 
 def greater(col : list[float], val:Any)->list[bool]:
     '''Returns a boolean list that has true if the corresponding list element is greater than the given number'''
-    g = lambda x : True if x >val else False
     return [x>val for x in col]
 
 def equal(col : list[float], val:Any)->list[bool]:
@@ -123,6 +122,9 @@ def trimmed_mean(col : list[float],per : int)->float:
     else:
         raise ValueError("Percentage value should be between 1 and 100")
 #sum((x-x_mean)^2)
+def var(col : list[float])->float:
+    ''' returns variance of the column'''
+    return sum(square(sub(col,mean(col))))/(len(col)-1)
 
 
 def isBoolean(col : list)->bool:
@@ -240,11 +242,8 @@ def total_prob(prob1,col):
 
 class Emperical_DRV:    
     
-    def __init__(self):
-        self.probs = {}  
-    
-    def __init__(self,l1):
-        unique_items = lambda list_with_duplicates: list(dict.fromkeys(list_with_duplicates))
+    def __init__(self,l1=[]):
+        #unique_items = lambda list_with_duplicates: list(dict.fromkeys(list_with_duplicates))
         if type(l1)==list:
             if all(isinstance(x,int) or isinstance(x,float) for x in l1):
                 self.probs = {x:l1.count(x)/len(l1) for x in set(l1)} 

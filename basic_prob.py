@@ -1,4 +1,21 @@
 from typing import Any
+def E(val):
+    if (type(val)==Emperical_DRV):
+        return val.E()
+
+def var(val )->float:
+    if type(val) == list:
+        return sum(square(sub(col,mean())))/(len(col)-1)
+    elif type(val)==Emperical_DRV:
+        return val.var()
+
+def sd(val)->float:
+    if type(val) == list:
+        return sqrt(var(col))
+    elif type(val)==Emperical_DRV:
+        return val.sd()
+# add moment generating function
+
 def sqrt(num : float )->float:
     '''Returns the square root of the given number'''
     xn=1
@@ -106,13 +123,7 @@ def trimmed_mean(col : list[float],per : int)->float:
     else:
         raise ValueError("Percentage value should be between 1 and 100")
 #sum((x-x_mean)^2)
-def var(col : list[float])->float:
-    ''' returns variance of the column'''
-    return sum(square(sub(col,mean())))/(len(col)-1)
 
-def sd(col : list[float])->float:
-    ''' returns standard deviation of the column'''
-    return sqrt(var(col))
 
 def isBoolean(col : list)->bool:
     ''' checks if the entire column is made up of boolean values'''
@@ -227,25 +238,25 @@ def total_prob(prob1,col):
         else:
             raise ValueError("Probability values should be less than 1")
 
-class Discrete_RV:    
+class Emperical_DRV:    
     
     def __init__(self):
-        self.values = {}  
+        self.probs = {}  
     
     def __init__(self,l1):
         unique_items = lambda list_with_duplicates: list(dict.fromkeys(list_with_duplicates))
         if type(l1)==list:
             if all(isinstance(x,int) or isinstance(x,float) for x in l1):
-                self.values = {x:l1.count(x)/len(l1) for x in set(l1)} 
+                self.probs = {x:l1.count(x)/len(l1) for x in set(l1)} 
             else:
                 raise TypeError("Expected a list of numbers")      
         elif type(l1)==dict:
             if all(isinstance(x,int) or isinstance(x,float) for x in l1.keys()):
                 s = sum(l1.values())
                 if s==1:
-                    self.values = l1.copy()
+                    self.probs = l1.copy()
                 elif s>0:
-                    self.values = {x:y for x,y in zip(l1.keys(),normalize(l1.values()))}
+                    self.probs = {x:y for x,y in zip(l1.keys(),normalize(l1.values()))}
                 else:
                     raise ValueError("Expected positive values")
             else:
@@ -255,49 +266,68 @@ class Discrete_RV:
     
     def __eq__(self, rhs):
         if type(rhs)==int or type(rhs)==float:
-            if rhs in self.values.keys():
-                return {rhs:self.values[rhs]}
+            if rhs in self.probs.keys():
+                return {rhs:self.probs[rhs]}
             else:
                 return {}
         elif type(rhs)==type(self):
-            return self.values == rhs.values
+            return self.probs == rhs.values
         else:
             raise ValueError("Expected a dict or int or float")
     
     def __lt__(self, rhs):
         if type(rhs)==int or type(rhs)==float:
-            return {x:y for x,y in self.values.items() if x<rhs}
+            return {x:y for x,y in self.probs.items() if x<rhs}
         elif type(rhs)==type(self):
-            return self.values < rhs.values
+            return self.probs < rhs.values
         else:
             raise ValueError("Expected a dict or int or float")
-            
+
     def __gt__(self, rhs):
         if type(rhs)==int or type(rhs)==float:
-            return {x:y for x,y in self.values.items() if x>rhs}
+            return {x:y for x,y in self.probs.items() if x>rhs}
         elif type(rhs)==type(self):
-            return self.values > rhs.values
+            return self.probs > rhs.values
         else:
             raise ValueError("Expected a dict or int or float")
 
     def __ge__(self, rhs):
         if type(rhs)==int or type(rhs)==float:
-            return {x:y for x,y in self.values.items() if x>=rhs}
+            return {x:y for x,y in self.probs.items() if x>=rhs}
         elif type(rhs)==type(self):
-            return self.values >= rhs.values
+            return self.probs >= rhs.values
         else:
             raise ValueError("Expected a dict or int or float") 
 
     def __le__(self, rhs):
         if type(rhs)==int or type(rhs)==float:
-            return {x:y for x,y in self.values.items() if x<=rhs}
+            return {x:y for x,y in self.probs.items() if x<=rhs}
         elif type(rhs)==type(self):
-            return self.values <= rhs.values
+            return self.probs <= rhs.values
         else:
             raise ValueError("Expected a dict or int or float") 
     
+
+
     def pmf(self,key):
         return prob(self==key)
     
     def cdf(self,key):
         return prob(self<=key)
+    
+    def E(self):
+        return sum(x*y for x,y in self.probs.items())
+
+    def transform(self,f):
+        a1 = {x:f(x) for x in self.probs.keys()}    
+        a2 = {val:sum([self.probs[i] for i,j in a1.items() if j==val]) for val in set(a1.values())}
+        return Emperical_DRV(a2)
+
+    def var(self):
+        return self.transform(lambda x:x**2).expectation()-self.expectation()**2
+
+    def sd(self):
+        return sqrt(self.variance())
+
+
+    

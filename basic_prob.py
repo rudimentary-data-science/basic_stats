@@ -27,7 +27,13 @@ def sqrt(num : float )->float:
         else:
             xn = xn1 
     return xn
+    
+def exp(val,n=10):
+    return sum([(val**i)/factorial(i) for i in range(n)])
 
+def floor(x):
+    return int(x)
+    
 def greater(col : list[float], val:Any)->list[bool]:
     '''Returns a boolean list that has true if the corresponding list element is greater than the given number'''
     return [x>val for x in col]
@@ -363,6 +369,7 @@ class Bernoulli_rv(discrete_rv):
     def __init__(self,p=1):
         if type(p)== float or type(p)==int:
             if p>=0 and p<=1:
+                self.p=p
                 self.probs={0:1-p,1:p}
             else:
                 raise ValueError("Expected: 0<=p<=1")
@@ -373,7 +380,13 @@ class Bernoulli_rv(discrete_rv):
                 raise ValueError("Incompatible dictionary size, expected length 2")
         else:
             raise TypeError("Expected p to be a number")   
-        
+    def E(self):
+        return self.p
+    def var(self):
+        return self.p * (1-self.p)
+    def sd(self):
+        return sqrt(self.p*(1-self.p))
+
 class Binomial_rv(discrete_rv):
     def __init__(self,p,n):
         if type(n)==int:
@@ -397,10 +410,85 @@ class Binomial_rv(discrete_rv):
                 raise ValueError("Incompatible dictionary size, expected length n ({})".format(self.n))
         else:
             raise TypeError("Expected p to be a number")
-
+    def E(self):
+        return self.n * self.p
+    def var(self): 
+        return self.n * self.p * (1-self.p)           
+    def sd(self):
+        return sqrt(self.n * self.p * (1-self.p))
         
+class Poisson_rv():
     
+    def __init__(self,l):
+        if type(l)==int or type(l)==float:
+            if l>0:
+                self.l = l
+                self.probs = {}
+            else:
+                raise ValueError("Expected: l>0")
+        else:
+            raise TypeError("Expected lambda to be a number")
+
+    def E(self):
+        return self.l
+    def var(self):
+        return self.l
+    def sd(self):
+        return sqrt(self.l)
+
+    def pmf(self,k):
+        if type(k)==int or type(k)==float:
+            if k>=0:
+                return (exp(-self.l)*(self.l**k))/factorial(k)
+            else:
+                return 0
+        else:
+            raise TypeError("Expected k to be a number")
+
+    def cdf(self,k):
+        if type(k)==int or type(k)==float:
+            if k>=0:
+                return sum([((exp(-self.l)*(self.l**i))/factorial(i)) for i in range(0,floor(k)+1)])
+            else:
+                return 0
+        else:
+            raise TypeError("Expected k to be a number")
+
+class Geometric_rv():
+
+    def __init__(self,p):
+        if type(p)== float or type(p)==int:
+            if p>=0 and p<=1:
+                self.p=p
+            else:
+                raise ValueError("Expected: 0<p<1")
+        else:
+            raise TypeError("Expected p to be a number")
+
+    def pmf(self, k):
+        if type(k)==int or type(k)==float:
+            if k>=0:
+                return ((1-self.p)**(k-1))*self.p
+            else:
+                return 0
+        else:
+            raise TypeError("Expected k to be a number")
+
+    def cdf(self,k):
+        if type(k)==int or type(k)==float:
+            if k>=0:
+                return 1-((1-self.p)**k)
+            else:
+                return 0
+        else:
+            raise TypeError("Expected k to be a number")
+
+    def E(self):
+        return 1/self.p
+
+    def var(self):
+        return (1-self.p)/(self.p**2)
+
+    def sd(self):
+        return sqrt(self.var())
         
-
-
-    

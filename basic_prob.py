@@ -1,18 +1,17 @@
 from typing import Any
 def E(val):
-    if (type(val)==Emperical_DRV):
-        return val.E()
+    return val.E()
 
 def var(val )->float:
     if type(val) == list:
         return sum(square(sub(val,mean(val))))/(len(val)-1)
-    elif type(val)==Emperical_DRV:
+    else:
         return val.var()
 
 def sd(val)->float:
     if type(val) == list:
         return sqrt(var(val))
-    elif type(val)==Emperical_DRV:
+    else:
         return val.sd()
 # add moment generating function
 
@@ -234,29 +233,18 @@ def total_prob(prob1,col):
         else:
             raise ValueError("Probability values should be less than 1")
 
-class Emperical_DRV:    
-    
-    def __init__(self,l1=[]):
-        #unique_items = lambda list_with_duplicates: list(dict.fromkeys(list_with_duplicates))
-        if type(l1)==list:
-            if all(isinstance(x,int) or isinstance(x,float) for x in l1):
-                self.probs = {x:l1.count(x)/len(l1) for x in set(l1)} 
-            else:
-                raise TypeError("Expected a list of numbers")      
-        elif type(l1)==dict:
-            if all(isinstance(x,int) or isinstance(x,float) for x in l1.keys()):
-                s = sum(l1.values())
-                if s==1:
-                    self.probs = l1.copy()
-                elif s>0:
-                    self.probs = {x:y for x,y in zip(l1.keys(),normalize(l1.values()))}
-                else:
-                    raise ValueError("Expected positive values")
-            else:
-                raise TypeError("Expected keys to be numbers")  
-        else:
-            raise TypeError("Expected list or dict")
-    
+def factorial(val):
+    if val == 0:
+        return 1
+    else:
+        f = 1
+        for i in range(1,val+1):
+            f = f*i
+        return f
+
+class discrete_rv:     
+    def __init__(self,val):
+        self.probs={}
     def __eq__(self, rhs):
         if type(rhs)==int or type(rhs)==float:
             if rhs in self.probs.keys():
@@ -312,7 +300,7 @@ class Emperical_DRV:
     def transform(self,f):
         a1 = {x:f(x) for x in self.probs.keys()}    
         a2 = {val:sum([self.probs[i] for i,j in a1.items() if j==val]) for val in set(a1.values())}
-        return Emperical_DRV(a2)
+        return Emperical_drv(a2)
 
     def var(self):
         return self.transform(lambda x:x**2).E()-self.E()**2
@@ -349,3 +337,70 @@ class Emperical_DRV:
         else:
             raise TypeError("Expected float or integer")
 
+class Emperical_drv(discrete_rv):
+    def __init__(self,l1=[]):
+        #unique_items = lambda list_with_duplicates: list(dict.fromkeys(list_with_duplicates))
+        if type(l1)==list:
+            if all(isinstance(x,int) or isinstance(x,float) for x in l1):
+                self.probs = {x:l1.count(x)/len(l1) for x in set(l1)} 
+            else:
+                raise TypeError("Expected a list of numbers")      
+        elif type(l1)==dict:
+            if all(isinstance(x,int) or isinstance(x,float) for x in l1.keys()):
+                s = sum(l1.values())
+                if s==1:
+                    self.probs = l1.copy()
+                elif s>0:
+                    self.probs = {x:y for x,y in zip(l1.keys(),normalize(l1.values()))}
+                else:
+                    raise ValueError("Expected positive values")
+            else:
+                raise TypeError("Expected keys to be numbers")  
+        else:
+            raise TypeError("Expected list or dict")
+
+class Bernoulli_rv(discrete_rv):
+    def __init__(self,p=1):
+        if type(p)== float or type(p)==int:
+            if p>=0 and p<=1:
+                self.probs={0:1-p,1:p}
+            else:
+                raise ValueError("Expected: 0<=p<=1")
+        elif type(p)==dict:
+            if(len(p)==2): #sum check
+                self.probs=p
+            else:
+                raise ValueError("Incompatible dictionary size, expected length 2")
+        else:
+            raise TypeError("Expected p to be a number")   
+        
+class Binomial_rv(discrete_rv):
+    def __init__(self,p,n):
+        if type(n)==int:
+            if n>=1:
+                self.n = n
+            else:
+                raise ValueError("Expected: n>=1")
+        else:
+            raise TypeError("n should be a positive integer")
+
+        if type(p)== float or type(p)==int:
+            if p>=0 and p<=1:
+                self.p = p
+                self.probs={i:(factorial(self.n)/(factorial(self.n-i)*factorial(i)))*(p**i)*((1-p)**(self.n-i)) for i in range(n+1)}
+            else:
+                raise ValueError("Expected: 0<=p<=1")
+        elif type(p)==dict:
+            if(len(p)==self.n):
+                self.probs=p
+            else:
+                raise ValueError("Incompatible dictionary size, expected length n ({})".format(self.n))
+        else:
+            raise TypeError("Expected p to be a number")
+
+        
+    
+        
+
+
+    

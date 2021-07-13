@@ -1,4 +1,5 @@
 from typing import Any
+pi=3.14
 def E(val):
     return val.E()
 
@@ -423,7 +424,6 @@ class Poisson_rv():
         if type(l)==int or type(l)==float:
             if l>0:
                 self.l = l
-                self.probs = {}
             else:
                 raise ValueError("Expected: l>0")
         else:
@@ -437,11 +437,13 @@ class Poisson_rv():
         return sqrt(self.l)
 
     def pmf(self,k):
-        if type(k)==int or type(k)==float:
+        if type(k)==int:
             if k>=0:
                 return (exp(-self.l)*(self.l**k))/factorial(k)
             else:
                 return 0
+        elif type(k)==float:
+            return 0
         else:
             raise TypeError("Expected k to be a number")
 
@@ -453,9 +455,52 @@ class Poisson_rv():
                 return 0
         else:
             raise TypeError("Expected k to be a number")
+    
+    def __eq__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return self.pmf(rhs)
+        elif type(rhs)==type(self):
+            return self.l == rhs.l
+        else:
+            raise ValueError("Expected a number or Poisson_rv object")
+                
+    def __le__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.l <= rhs.l
+        else:
+            raise ValueError("Expected a number or Poisson_rv object")    
+                        
+    def __gt__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return 1-self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.l > rhs.l
+        else:
+            raise ValueError("Expected a number or Poisson_rv object")
+            
+    def __lt__(self,rhs):
+        if type(rhs)==int:
+            return self.cdf(rhs)-self.pmf(rhs)
+        elif type(rhs)==float:
+            return self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.l < rhs.l
+        else:
+            raise ValueError("Expected a number or Poisson_rv object")
+
+    def __ge__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return 1-self.cdf(rhs)+self.pmf(rhs)
+        elif type(rhs)==float:
+            return 1-self.cdf(rhs)    
+        elif type(rhs)==type(self):
+            return self.l >= rhs.l
+        else:
+            raise ValueError("Expected a number or Poisson_rv object")
 
 class Geometric_rv():
-
     def __init__(self,p):
         if type(p)== float or type(p)==int:
             if p>=0 and p<=1:
@@ -466,11 +511,13 @@ class Geometric_rv():
             raise TypeError("Expected p to be a number")
 
     def pmf(self, k):
-        if type(k)==int or type(k)==float:
+        if type(k)==int:
             if k>=0:
                 return ((1-self.p)**(k-1))*self.p
             else:
                 return 0
+        elif type(k)==float:
+            return 0
         else:
             raise TypeError("Expected k to be a number")
 
@@ -491,4 +538,105 @@ class Geometric_rv():
 
     def sd(self):
         return sqrt(self.var())
-        
+
+    def __eq__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return self.pmf(rhs)
+        elif type(rhs)==type(self):
+            return self.l == rhs.l
+        else:
+            raise ValueError("Expected a number or Geometric_rv object")
+                
+    def __le__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.p <= rhs.p
+        else:
+            raise ValueError("Expected a number or Geometric_rv object")    
+                        
+    def __gt__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return 1-self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.p > rhs.p
+        else:
+            raise ValueError("Expected a number or Geometric_rv object")
+            
+    def __lt__(self,rhs):
+        if type(rhs)==int:
+            return self.cdf(rhs)-self.pmf(rhs)
+        elif type(rhs)==float:
+            return self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.p < rhs.p
+        else:
+            raise ValueError("Expected a number or Geometric_rv object")
+
+    def __ge__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return 1-self.cdf(rhs)+self.pmf(rhs)
+        elif type(rhs)==float:
+            return 1-self.cdf(rhs)    
+        elif type(rhs)==type(self):
+            return self.p >= rhs.p
+        else:
+            raise ValueError("Expected a number or Poisson_rv object")
+
+class uniform_rv:
+    
+    def __init__(self,a,b):
+        if (type(a)==int or type(a)==float) and (type(b)==int or type(b)==float):
+            if (b>a):
+                self.a = a
+                self.b = b
+            else:
+                raise ValueError("Upper limit should be greater than lower limit")
+        else:
+            raise TypeError("Expected 'a' and 'b' to be numbers")
+    
+    def pdf(self,x):
+        if type(x)==int or type(x)==float:
+            if x>self.a and x<self.b:
+                return (1/(self.b-self.a))
+            else:
+                return 0
+        else:
+            raise TypeError("Expected x to be a number")
+
+    def cdf(self,x):
+        if type(x)==int or type(x)==float:
+            if x>self.a and x<self.b:
+                return ((x-self.a)/(self.b-self.a))
+            elif x<self.a:
+                return 0
+            else:
+                return 1
+        else:
+            raise TypeError("Expected x to be a number")
+
+class normal_rv:
+
+    def __init__(self,u,s):
+        if (type(u)==int or type(u)==float) and (type(s)==int or type(s)==float):
+            if u>0 and s>0:
+                self.u = u 
+                self.s = s    
+            else:
+                raise ValueError("Mean and standard deviation should be positive")
+        else:
+            raise TypeError("Mean and standard deviation should be numbers")
+
+    def pdf(self,x):
+        if type(x)==int or type(x)==float:
+            return exp(-(x-self.u)**2/(2*(self.s**2)))/(self.s*sqrt(2*pi))
+        else:
+            raise TypeError("Expected x to be a number")
+
+    
+    
+def integrate(f,a,b,n=100_000):
+    #very basic, needs improvement
+    return ((b-a)/n)*sum(f(a+(x*(b-a)/n)) for x in range(n))
+
+

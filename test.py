@@ -35,4 +35,5 @@ def test_time2():
 E = bp.E
 print(E(rv.transform(lambda x:x)))
 print([E(rv+2),E(2+rv),E(2*rv),E(rv*2),E(rv**2)])
-
+f = lambda x:x**2
+print()

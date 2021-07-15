@@ -1,6 +1,5 @@
 from typing import Any
-
-
+pi=3.14
 def E(val):
     return val.E()
 
@@ -488,7 +487,6 @@ class Poisson_rv():
         if type(l) == int or type(l) == float:
             if l > 0:
                 self.l = l
-                self.probs = {}
             else:
                 raise ValueError("Expected: l>0")
         else:
@@ -503,12 +501,14 @@ class Poisson_rv():
     def sd(self):
         return sqrt(self.l)
 
-    def pmf(self, k):
-        if type(k) == int or type(k) == float:
-            if k >= 0:
-                return (exp(-self.l) * (self.l ** k)) / factorial(k)
+    def pmf(self,k):
+        if type(k)==int:
+            if k>=0:
+                return (exp(-self.l)*(self.l**k))/factorial(k)
             else:
                 return 0
+        elif type(k)==float:
+            return 0
         else:
             raise TypeError("Expected k to be a number")
 
@@ -520,42 +520,38 @@ class Poisson_rv():
                 return 0
         else:
             raise TypeError("Expected k to be a number")
-
-
-class Geometric_rv():
-
-    def __init__(self, p):
-        if type(p) == float or type(p) == int:
-            if 0 <= p <= 1:
-                self.p = p
-            else:
-                raise ValueError("Expected: 0<p<1")
+    
+    def __eq__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return self.pmf(rhs)
+        elif type(rhs)==type(self):
+            return self.l == rhs.l
         else:
-            raise TypeError("Expected p to be a number")
-
-    def pmf(self, k):
-        if type(k) == int or type(k) == float:
-            if k >= 0:
-                return ((1 - self.p) ** (k - 1)) * self.p
-            else:
-                return 0
+            raise ValueError("Expected a number or Poisson_rv object")
+                
+    def __le__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.l <= rhs.l
         else:
-            raise TypeError("Expected k to be a number")
-
-    def cdf(self, k):
-        if type(k) == int or type(k) == float:
-            if k >= 0:
-                return 1 - ((1 - self.p) ** k)
-            else:
-                return 0
+            raise ValueError("Expected a number or Poisson_rv object")    
+                        
+    def __gt__(self,rhs):
+        if type(rhs)==int or type(rhs)==float:
+            return 1-self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.l > rhs.l
         else:
-            raise TypeError("Expected k to be a number")
+            raise ValueError("Expected a number or Poisson_rv object")
+            
+    def __lt__(self,rhs):
+        if type(rhs)==int:
+            return self.cdf(rhs)-self.pmf(rhs)
+        elif type(rhs)==float:
+            return self.cdf(rhs)
+        elif type(rhs)==type(self):
+            return self.l < rhs.l
+        else:
+            raise ValueError("Expected a number or Poisson_rv object")
 
-    def E(self):
-        return 1 / self.p
-
-    def var(self):
-        return (1 - self.p) / (self.p ** 2)
-
-    def sd(self):
-        return sqrt(self.var())

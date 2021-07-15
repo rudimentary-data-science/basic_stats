@@ -26,7 +26,7 @@ d = {1:1/6,2:1/6,3:1/6,4:1/6,5:1/6,6:1/6}
 #rv = bp.Emperical_DRV(d)
 #a2 = {val:[i for i,j in a1.items() if j==val] for val in set(a1.values())}
 rv = bp.Binomial_rv(0.5,10)
-a = lambda x:x**2 
+a = lambda x:x**2
 from time import time
 
 def test_time2():
